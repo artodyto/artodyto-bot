@@ -27,7 +27,7 @@ client.on('error', (error) => {
     isBotReady = false;
 });
 
-const command = '<y>';
+const command = '<<';
 client.on('message', async message => {
     if (message.content === `${command}ping`) {
         message.channel.send('pong');
@@ -72,14 +72,14 @@ setInterval(() => {
         count++;
     }
 
-}, 20 * 1000);
+}, 30 * 1000);
 
-let lastTimestamp = Math.floor(Date.now() / 1000);
+let hour = (60 * 1000) * 60;
+let lastTimestamp = Math.floor((Date.now() - hour) / 1000);
 
 const getSubredditAbout = async(uri) => {
     subredditData =  await fetch(uri).then(res => res.json()).catch(error => console.error(error));
 }
-
 
 async function fetchSubreddit(uri) {
     const { data } = await fetch(uri).then(res => res.json()).catch(error => console.error(error));
@@ -89,12 +89,12 @@ async function fetchSubreddit(uri) {
 
     for (let i=0; i< data.children.length; i++) {
         var feed = data.children[i].data;
-        lastTimestamp = data.children[data.children.length-1].data.created_utc;
+        console.log(`${lastTimestamp} < ${feed.created_utc}`);
         embed = new MessageEmbed();
-
         if (lastTimestamp < feed.created_utc) {
+            lastTimestamp = feed.created_utc;
             if (feed.stickied != true) {
-                embed.setAuthor(feed.subreddit_name_prefixed, subredditData.icon_img, `https://reddit.com${subredditData.url}`);
+                embed.setAuthor(feed.subreddit_name_prefixed, subredditData.data.icon_img, `https://reddit.com${subredditData.data.url}`);
                 embed.setColor('#007cbf');
                 embed.setTitle(feed.title == "" ? feed.subreddit : feed.title);
                 embed.setURL(`https://redd.it/${feed.id}`);
